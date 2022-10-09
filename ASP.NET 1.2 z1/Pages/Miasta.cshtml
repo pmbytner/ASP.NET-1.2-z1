@@ -1,0 +1,110 @@
+﻿@page
+@model ASP.NET_1._2_z1.Pages.MiastaModel
+@{
+    string[] etykiety = { 
+        "Nazwa", 
+        "Populacja", 
+        "Powierzchnia", 
+        "Województwo" 
+    };
+    Dictionary<
+        string,
+        (string Nazwa, int Populacja, decimal Powierzchnia)[]
+        > miastaPoWojewództwach = new()
+        {
+            ["Kujawsko-Pomorskie"] = new []{
+                ("Grudziądz", 100000, 76.62m)
+            },
+            ["Pomorskie"] = new []{
+                ("Gdańsk", 500000, 123.45m),
+                ("Gdynia", 250000, 234.56m),
+            },
+            ["Warmińsko-Mazurskie"] = new []{
+                ("Elbląg", 150000, 101.61m)
+            }
+        };
+    LinkedList<(
+        string Nazwa,
+        int Populacja,
+        decimal Powierzchnia,
+        string Województwo
+        )> miasta = new();
+
+    if(
+        Request.Query.ContainsKey("Województwo")
+        ) {
+        foreach(
+            (string Nazwa, int Populacja, decimal Powierzchnia) miasto
+            in
+            miastaPoWojewództwach[Request.Query["Województwo"]]
+            )
+            miasta.AddLast((
+                miasto.Nazwa,
+                miasto.Populacja,
+                miasto.Powierzchnia,
+                Request.Query["Województwo"]
+                ));
+    }
+    else {
+    foreach (
+        KeyValuePair<
+            string,
+            (string Nazwa, int Populacja, decimal Powierzchnia)[]
+            > województwo
+        in
+        miastaPoWojewództwach
+        )
+        foreach (
+            (string Nazwa, int Populacja, decimal Powierzchnia) miasto
+            in
+            województwo.Value
+            )
+            miasta.AddLast((
+                miasto.Nazwa,
+                miasto.Populacja,
+                miasto.Powierzchnia,
+                województwo.Key
+                ));
+                }
+}
+<div>
+    @{
+        foreach(string województwo in miastaPoWojewództwach.Keys)
+        {
+          <a href="?Województwo=@województwo">@województwo</a>
+        }
+    }
+</div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                @{
+                foreach (string etykieta in etykiety)
+                {
+                            <th>@etykieta</th>
+                }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{
+            foreach (
+                (
+                    string Nazwa,
+                    int Populacja,
+                    decimal Powierzchnia,
+                    string Województwo
+                ) miasto
+                in
+                miasta
+            ) {
+                        <tr>
+                            <td>@miasto.Nazwa</td>
+                            <td>@miasto.Populacja</td>
+                            <td>@miasto.Powierzchnia</td>
+                            <td>@miasto.Województwo</td>
+                        </tr>
+            }
+        }
+    </tbody>
+</table>
